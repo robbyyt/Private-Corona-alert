@@ -6,7 +6,7 @@ interface OTSender {
   q: ISafePrime;
   n: IRSAModulus;
   messageBitCount: number;
-  messages: Array<string>;
+  messages: string[] ;
 };
 
 class OTSender {
@@ -21,7 +21,7 @@ class OTSender {
    * @param messages
    * An array of bitstrings of length equal to messageBitCount
    */
-  constructor(p: ISafePrime, q: ISafePrime, messageBitCount: number, messages: Array<string>) {
+  constructor(p: ISafePrime, q: ISafePrime, messageBitCount: number, messages: string[]) {
     this.p = p;
     this.q = q;
     this.messageBitCount = messageBitCount;
@@ -34,15 +34,15 @@ class OTSender {
   }
 
   prepareInitialValues(): IOTSenderInitialValues {
-    const y = generateQNRModRSA(this.p.value, this.q.value);
+    const y = generateQNRModRSA(this.n);
     console.log(
     `Generated y = ${y}
     Jacobi symbol of y = ${computeJacobiSymbol(y, this.n.value)}
     `);
-    let zArray: Array<Array<bigint>> = [];
+    const zArray: bigint[][] = [];
 
     for(const message of this.messages) {
-      const encoding: Array<bigint> = [];
+      const encoding: bigint[] = [];
       for(const currentBit of message) {
         const c = generateRSACoprimeValue(this.n);
         const z = ((c ** 2n) * (y ** BigInt(currentBit))) % this.n.value;

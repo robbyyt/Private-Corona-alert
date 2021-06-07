@@ -91,20 +91,20 @@ export const generateQNRModPrime = (p: bigint): bigint => {
 
   let a = randBetween(p - 1n);
 
-  while(computeJacobiSymbol(a, p) != -1) {
+  while(computeJacobiSymbol(a, p) !== -1) {
     a = randBetween(p - 1n);
   }
 
   return a;
 }
 
-export const generateQNRModRSA = (p: bigint, q: bigint): bigint => {
-  let a = generateQNRModPrime(p);
+export const generateQNRModRSA = (n: IRSAModulus): bigint => {
+  let a = generateRSACoprimeValue(n);
 
-  while(computeJacobiSymbol(a, q) != -1) {
-    a = generateQNRModPrime(p);
+  while(computeJacobiSymbol((n.value - (a ** 2n % n.value)), n.p.value) !== -1 || computeJacobiSymbol((n.value - (a ** 2n % n.value)), n.q.value) !== -1) {
+    a = generateRSACoprimeValue(n);
   }
 
-  return a;
+  return (n.value - (a ** 2n % n.value));
 };
 
