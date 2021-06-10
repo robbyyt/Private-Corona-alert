@@ -1,7 +1,7 @@
 interface IOTSenderInitialValues {
   n: bigint;
   y: bigint;
-  zArray: Array<Array<bigint>>
+  zArray: bigint[][]
 };
 
 export default IOTSenderInitialValues;
