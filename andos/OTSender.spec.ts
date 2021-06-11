@@ -1,4 +1,4 @@
-import { generateSafePrime, computeJacobiSymbol } from "./utils/primes";
+import { generateSafePrime, computeJacobiLegendreSymbol } from "./utils/primes";
 import OTSender from "./OTSender";
 
 (async () => {

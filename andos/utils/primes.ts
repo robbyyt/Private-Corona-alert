@@ -53,9 +53,9 @@ export const generateRSACoprimeValue = (n: IRSAModulus): bigint => {
  * @returns
  * The Jacobi Symbol (a/n)
  */
-export const computeJacobiSymbol = (a: bigint, n: bigint): number => {
+export const computeJacobiLegendreSymbol = (a: bigint, n: bigint): number => {
   if( !(n % 2n) || (n <= 0) ) {
-    throw new Error("The modulus for the Jacobi symbol must me an odd positive integer");
+    throw new Error("The modulus for the Legendre/Jacobi symbol must me an odd positive integer");
   }
   let t: number = 1;
     a = a % n;
@@ -91,7 +91,7 @@ export const generateQNRModPrime = (p: bigint): bigint => {
 
   let a = randBetween(p - 1n);
 
-  while(computeJacobiSymbol(a, p) !== -1) {
+  while(computeJacobiLegendreSymbol(a, p) !== -1) {
     a = randBetween(p - 1n);
   }
 
@@ -101,7 +101,7 @@ export const generateQNRModPrime = (p: bigint): bigint => {
 export const generateQNRModRSA = (n: IRSAModulus): bigint => {
   let a = generateRSACoprimeValue(n);
 
-  while(computeJacobiSymbol((n.value - (a ** 2n % n.value)), n.p.value) !== -1 || computeJacobiSymbol((n.value - (a ** 2n % n.value)), n.q.value) !== -1) {
+  while(computeJacobiLegendreSymbol((n.value - (a ** 2n % n.value)), n.p.value) !== -1 || computeJacobiLegendreSymbol((n.value - (a ** 2n % n.value)), n.q.value) !== -1) {
     a = generateRSACoprimeValue(n);
   }
 

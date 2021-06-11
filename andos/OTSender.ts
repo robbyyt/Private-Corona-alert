@@ -1,12 +1,13 @@
 import { IOTSenderInitialValues, IRSAModulus, ISafePrime } from "./models";
-import { generateQNRModRSA, computeJacobiSymbol, generateRSACoprimeValue } from "./utils/primes";
+import { generateQNRModRSA, computeJacobiLegendreSymbol, generateRSACoprimeValue } from "./utils/primes";
 
 interface OTSender {
   p: ISafePrime;
   q: ISafePrime;
   n: IRSAModulus;
   messageBitCount: number;
-  messages: string[] ;
+  messages: string[];
+  receiverSigmaPacket: bigint[][],
 };
 
 class OTSender {
@@ -37,7 +38,7 @@ class OTSender {
     const y = generateQNRModRSA(this.n);
     console.log(
     `Generated y = ${y}
-    Jacobi symbol of y = ${computeJacobiSymbol(y, this.n.value)}
+    Jacobi symbol of y = ${computeJacobiLegendreSymbol(y, this.n.value)}
     `);
     const zArray: bigint[][] = [];
 
@@ -56,6 +57,26 @@ class OTSender {
       y,
       zArray
     };
+  }
+
+  setReceiverPacket(sigmaPacket: bigint[][]): void {
+    this.receiverSigmaPacket = sigmaPacket;
+  }
+
+  processReceiverRequest(k: number): number[] {
+    if(!this.receiverSigmaPacket.length) {
+      throw new Error("Receiver sigma packet not set!");
+    }
+    const qrArr: number[] = [];
+    for(let j = 0; j < this.messageBitCount; j++) {
+      if(computeJacobiLegendreSymbol(this.receiverSigmaPacket[k][j], this.p.value) === 1 && computeJacobiLegendreSymbol(this.receiverSigmaPacket[k][j], this.q.value) === 1) {
+        qrArr.push(1);
+      } else {
+        qrArr.push(0);
+      }
+    }
+
+    return qrArr;
   }
 }
 

@@ -1,4 +1,4 @@
-import { generateSafePrime, computeJacobiSymbol } from "./primes";
+import { generateSafePrime, computeJacobiLegendreSymbol } from "./primes";
 
 // (async () => {
 //   const safePrime = await generateSafePrime();
@@ -6,4 +6,4 @@ import { generateSafePrime, computeJacobiSymbol } from "./primes";
 // })();
 
 
-console.log(computeJacobiSymbol(8n, 299n));
+console.log(computeJacobiLegendreSymbol(8n, 299n));
