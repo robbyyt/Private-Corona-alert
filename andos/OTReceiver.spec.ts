@@ -4,8 +4,8 @@ import { generateSafePrime, computeJacobiLegendreSymbol } from "./utils/primes";
 
 
 (async () => {
-  const p = await generateSafePrime(12);
-  const q = await generateSafePrime(12);
+  const p = await generateSafePrime(32);
+  const q = await generateSafePrime(32);
   console.log(
     `Generated:
   p = ${p.value}
@@ -13,7 +13,7 @@ import { generateSafePrime, computeJacobiLegendreSymbol } from "./utils/primes";
   `
   );
 
-  const sender = new OTSender(p, q, 5, ["10101", "10000", "01001"]);
+  const sender = new OTSender(p, q, 1, ["1", "1", "1", "0", "0", "0"]);
   const{ n, y, zArray } = sender.prepareInitialValues();
 
   console.log(
