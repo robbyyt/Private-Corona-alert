@@ -1,13 +1,17 @@
 'use strict';
 
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const morgan = require('morgan');
-const StatusCodes = require('http-status-codes');
-const dotenv = require('dotenv');
-const mongoose = require('mongoose');
-const helmet = require('helmet');
+import express from "express";
+import bodyParser from "body-parser";
+import cors from 'cors';
+import StatusCodes from "http-status-codes";
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import helmet from "helmet";
+import { SectorInformation, ServerKey } from "./models";
+import { generateSafePrime, generateQNRModRSA } from "./andos/utils/primes";
+import { serializeSafePrime } from "./utils/conversions";
+import { IRSAModulus } from "./andos/models";
+import router from "./routes";
 
 // environment variables
 const config = dotenv.config();
@@ -27,7 +31,9 @@ const app = express();
 app.use(cors());
 app.use(helmet())
 app.use(bodyParser.json());
-app.use(morgan('tiny'));
+
+// router
+app.use('/api', router);
 
 // 404
 app.use((req, res, next) => {
@@ -41,6 +47,50 @@ app.use((error, req, res, next) => {
   req.log.error(error);
   return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ error });
 });
+
+(async () => {
+  await mongoose.connect(env.DB_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  }).then(() => console.log("Connected to DB"))
+  .catch(err => console.log(`DB connection error: ${err}`));
+
+  // let sector = new SectorInformation({
+  //   sectorIdentifier: 'test:test',
+  //   locationInformation: ['10', '01', '00', '00']
+  // })
+
+  // await sector.save();
+  const serverKeyInfo = await ServerKey.find();
+  if(!serverKeyInfo.length) {
+    console.log("Generating server key...");
+    const p = await generateSafePrime(1024);
+    const q = await generateSafePrime(1024);
+    const n: IRSAModulus = {
+      p,
+      q,
+      value: p.value * q.value
+    };
+
+    const y = generateQNRModRSA(n);
+    console.log(
+      `Generated server key:
+      p = ${p.value}
+      q = ${q.value}
+      y = ${y}
+      `);
+
+    const key = new ServerKey({
+      p: serializeSafePrime(p),
+      q: serializeSafePrime(q),
+      y: y.toString()
+    });
+
+    key.save();
+
+  }
+})()
+
 
 app.listen(PORT, () => console.log(`App is listening on port ${PORT}`));
 
