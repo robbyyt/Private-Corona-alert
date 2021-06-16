@@ -1,5 +1,8 @@
 import IStartTransferQuery from "./StartTransferQuery";
+import { ICompleteTransferQuery, ICompleteTransferBody } from "./CompleteTransferQuery";
 
 export type {
-  IStartTransferQuery
+  IStartTransferQuery,
+  ICompleteTransferQuery,
+  ICompleteTransferBody
 };

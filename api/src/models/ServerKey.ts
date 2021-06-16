@@ -2,13 +2,16 @@ import { ISafePrime } from "../andos/models";
 import { Schema, model } from 'mongoose';
 
 interface IServerKey {
-  p: ISafePrime;
-  q: ISafePrime;
+  p: string;
+  q: string;
+  y: string;
+  n: string
 }
 
 const ServerKeySchema = new Schema<IServerKey>({
   p: String,
   q: String,
+  n: String,
   y: String,
 });
 

@@ -2,7 +2,8 @@ import { Schema, model } from 'mongoose';
 
 interface ISectorInformation {
   sectorIdentifier: string;
-  locationInformation: Array<string>
+  locationInformation: string[],
+  locationZArray: string[][]
 }
 
 const SectorInformationSchema = new Schema<ISectorInformation>({
@@ -12,6 +13,11 @@ const SectorInformationSchema = new Schema<ISectorInformation>({
       default: null,
     },
     locationInformation: {
+      type: Array,
+      required: true,
+      default: []
+    },
+    locationZArray: {
       type: Array,
       required: true,
       default: []

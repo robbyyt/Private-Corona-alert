@@ -55,12 +55,6 @@ app.use((error, req, res, next) => {
   }).then(() => console.log("Connected to DB"))
   .catch(err => console.log(`DB connection error: ${err}`));
 
-  // let sector = new SectorInformation({
-  //   sectorIdentifier: 'test:test',
-  //   locationInformation: ['10', '01', '00', '00']
-  // })
-
-  // await sector.save();
   const serverKeyInfo = await ServerKey.find();
   if(!serverKeyInfo.length) {
     console.log("Generating server key...");
@@ -83,6 +77,7 @@ app.use((error, req, res, next) => {
     const key = new ServerKey({
       p: serializeSafePrime(p),
       q: serializeSafePrime(q),
+      n: (p.value * q.value).toString(),
       y: y.toString()
     });
 

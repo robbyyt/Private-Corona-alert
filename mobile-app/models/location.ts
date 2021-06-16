@@ -6,3 +6,8 @@ export interface IRegion {
 export interface ILocation extends IRegion{
   timestamp: number
 };
+
+export interface ILocationInfo {
+  sectorIdentifier: string,
+  positionValue: number,
+}
