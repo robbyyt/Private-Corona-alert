@@ -4,7 +4,7 @@ interface ICompleteTransferQuery {
 
 interface ICompleteTransferBody {
   sigmaPacket: string[][],
-  receiverRequest: number
+  receiverRequest: number | number[]
 }
 
 export {ICompleteTransferBody, ICompleteTransferQuery};

@@ -1,8 +1,9 @@
 import { Response } from "express";
 import StatusCodes from "http-status-codes";
 import { OTSender } from "../andos";
-import { SectorInformation } from "../models";
+import { SectorInformation, ServerKey } from "../models";
 import { ICompleteTransferBody, ICompleteTransferQuery } from "../models/interfaces";
+import { convertStringMatrixToBigInt } from "../utils/conversions";
 import { MESSAGE_BIT_COUNT, sectorIdRegex, MESSAGES_PER_SECTOR } from "../constants/ot";
 
 const completeTransferController = async (req, res: Response) => {
@@ -22,7 +23,7 @@ const completeTransferController = async (req, res: Response) => {
     });
   }
 
-  if(!body.receiverRequest || !(typeof body.receiverRequest === "number") || body.receiverRequest >= MESSAGES_PER_SECTOR) {
+  if(!body.receiverRequest || !(typeof body.receiverRequest === "number" || Array.isArray(body.receiverRequest)) || body.receiverRequest >= MESSAGES_PER_SECTOR) {
     return res.status(StatusCodes.BAD_REQUEST).json({
       error: "Request body must contain a valid receiverRequest parameter!"
     });
@@ -33,6 +34,40 @@ const completeTransferController = async (req, res: Response) => {
   if(!sector) {
     return res.status(StatusCodes.BAD_REQUEST).json({
       error: "Sector not found! Try initiating a transfer first."
+    });
+  }
+
+  try {
+    const [{n, y, p, q}] = await ServerKey.find();
+    const qObj = JSON.parse(q);
+    const pObj = JSON.parse(p);
+
+    pObj.value = BigInt(pObj.value);
+    pObj.basePrime = BigInt(pObj.basePrime);
+    qObj.value = BigInt(qObj.value);
+    qObj.basePrime = BigInt(qObj.basePrime);
+    const sectorMessages = sector.locationInformation;
+    const sender = new OTSender(pObj, qObj, MESSAGE_BIT_COUNT, sectorMessages, BigInt(y));
+    const sigmaPacket: bigint[][] = convertStringMatrixToBigInt(body.sigmaPacket);
+    sender.setReceiverPacket(sigmaPacket);
+
+    const response: number[][] = [];
+
+    if(!Array.isArray(body.receiverRequest)) {
+      response.push(sender.processReceiverRequest(body.receiverRequest))
+    } else {
+      for(const request of body.receiverRequest) {
+        response.push(sender.processReceiverRequest(request));
+      }
+    }
+
+    return res.status(StatusCodes.OK).json({
+      results: response
+    });
+  }
+catch(e) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: "Server error, are you sure your sigma packet was valid?"
     });
   }
 };
