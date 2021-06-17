@@ -11,3 +11,12 @@ export interface ILocationInfo {
   sectorIdentifier: string,
   positionValue: number,
 }
+
+export interface ILocationGroupValue {
+  locationArr: ILocation[]
+  valueArr: number[]
+}
+
+export interface ILocationGroup {
+  [key: string]: ILocationGroupValue
+}

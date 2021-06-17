@@ -2,20 +2,23 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { StyleSheet, Alert } from 'react-native';
 import MapView, { MapEvent, Marker } from 'react-native-maps';
-import { Text, View, IconButton, Button } from '../components/Themed';
+import { Text, View, IconButton, Button, TransparentBGText } from '../components/Themed';
 import { getCurrentLocation } from "../services/location";
-import { ILocation, IRegion } from '../models/location';
+import { verifyLocations } from "../services/ot";
+import { clearLocationData, updateLocationData } from '../services/storage';
+import { ILocation } from '../models/location';
 
 export default function TabOneScreen() {
-  const [region, setRegion] = useState<IRegion>();
   const [location, setLocation] = useState<ILocation>();
+  const [loadingText, setLoadingText] = useState<string>("");
 
   useEffect(() => {
     (async () => {
+      setLoadingText("Loading current location")
       const userLocation = await getCurrentLocation();
-      Alert.alert(`${userLocation.latitude}
-      ${userLocation.longitude}`)
       setLocation(userLocation);
+      setLoadingText("");
+      await clearLocationData();
     })()
   }, []);
 
@@ -32,9 +35,22 @@ export default function TabOneScreen() {
     updateLocation(longitude, latitude);
   };
 
+  const onCheckClick = async () => {
+    if(location) {
+      const {data, error} = await updateLocationData(location);
+      if(error) {
+        verifyLocations([location]);
+      } else if(data) {
+        verifyLocations(data);
+      }
+    }
+  };
+
   const crosshairBtnPress = async () => {
+      setLoadingText("Loading current location");
       const userLocation = await getCurrentLocation();
       setLocation(userLocation);
+      setLoadingText("");
   };
 
   return (
@@ -46,12 +62,14 @@ export default function TabOneScreen() {
       </MapView>
       <View style={styles.crosshairContainer}>
         <IconButton icon="crosshairs-gps"  onPress={crosshairBtnPress}/>
-
       </View>
-      <View style={styles.checkSafetyContainer}>
-        <Button>
+      <View style={[styles.checkSafetyContainer, loadingText? styles.transparentBackground: null]}>
+        {loadingText ?
+        <TransparentBGText style={styles.loadingText}>{loadingText}</TransparentBGText>
+        :
+        <Button onPress={onCheckClick}>
           Check for 🦠
-        </Button>
+        </Button>}
       </View>
     </View>
   );
@@ -62,7 +80,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
-  title: {
+  loadingText: {
     fontSize: 20,
     fontWeight: 'bold',
   },
@@ -85,5 +103,8 @@ const styles = StyleSheet.create({
   position: 'absolute',
   alignSelf: 'center',
   top: '90%'
+  },
+  transparentBackground: {
+    backgroundColor: "transparent"
   }
 });

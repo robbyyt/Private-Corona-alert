@@ -1,5 +1,5 @@
 import * as Location from 'expo-location';
-import { ILocation, ILocationInfo } from "../models/location";
+import { ILocation, ILocationInfo, ILocationGroup } from "../models/location";
 
 const sectorPrecision = 2;
 const privateLocationPrecision = 2;
@@ -33,3 +33,24 @@ export const parseLocation = (latitude: number, longitude: number): ILocationInf
     positionValue: privateLatitudeValue * transferMaxValue + privateLongitudeValue,
   }
 }
+
+export const groupLocationsBySectorIdentifier = (locationArr: ILocation[]): ILocationGroup => {
+  let result: ILocationGroup = {};
+
+  for(const location of locationArr) {
+    const { sectorIdentifier, positionValue } = parseLocation(location.latitude, location.longitude);
+    if(!result[sectorIdentifier]) {
+      result[sectorIdentifier] = {
+        valueArr: [positionValue],
+        locationArr: [location]
+      };
+    } else if(!result[sectorIdentifier].valueArr.includes(positionValue)) {
+      result[sectorIdentifier] = {
+        valueArr: [...result[sectorIdentifier].valueArr, positionValue],
+        locationArr: [...result[sectorIdentifier].locationArr, location]
+      };
+    }
+  };
+
+  return result;
+};

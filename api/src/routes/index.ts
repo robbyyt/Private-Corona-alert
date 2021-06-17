@@ -6,6 +6,6 @@ import { initiateTransferController, completeTransferController } from "../contr
 const router = Router();
 
 router.get('/initiate-transfer', initiateTransferController);
-router.get('/complete-transfer', completeTransferController);
+router.post('/complete-transfer', completeTransferController);
 
 export default router;

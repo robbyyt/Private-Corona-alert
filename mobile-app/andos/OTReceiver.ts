@@ -41,7 +41,10 @@ class OTReceiver {
       for(let j = 0; j < this.messageBitCount; j++) {
         const a = Math.round(Math.random());
         const r = randBetween(this.n - 1n, 0n);
-        let q = this.zArray[i][j];
+        let q: bigint = BigInt(this.zArray[i][j]);
+        console.log(typeof r, typeof this.n);
+        console.log(r ** 2n % this.n);
+        console.log(typeof (r ** 2n % this.n));
         q = q * (r ** 2n % this.n) % this.n;
         q = a === 1 ? (q * this.y) % this.n : q;
 
