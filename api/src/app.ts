@@ -31,7 +31,7 @@ const app = express();
 // middlewares
 app.use(cors());
 app.use(helmet())
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50MB'}));
 
 // router
 app.use('/api', router);
@@ -45,7 +45,7 @@ app.use((req, res, next) => {
 
 // 500 - Any server error
 app.use((error, req, res, next) => {
-  req.log.error(error);
+  console.log(error);
   return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ error });
 });
 

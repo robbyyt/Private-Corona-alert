@@ -10,5 +10,6 @@ export interface InitiateTransferResponse {
 };
 
 export interface CompleteTransferResponse {
-  response : number[][]
+  results: number[][]
 };
+

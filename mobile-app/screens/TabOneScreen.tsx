@@ -10,6 +10,7 @@ import { ILocation } from '../models/location';
 
 export default function TabOneScreen() {
   const [location, setLocation] = useState<ILocation>();
+  const [riskyLocations, setRiskyLocations] = useState<ILocation[]>([]);
   const [loadingText, setLoadingText] = useState<string>("");
 
   useEffect(() => {
@@ -38,10 +39,13 @@ export default function TabOneScreen() {
   const onCheckClick = async () => {
     if(location) {
       const {data, error} = await updateLocationData(location);
+      let riskyLocations: ILocation[];
       if(error) {
-        verifyLocations([location]);
+        riskyLocations = await verifyLocations([location]);
+        setRiskyLocations(riskyLocations);
       } else if(data) {
-        verifyLocations(data);
+        riskyLocations = await verifyLocations(data);
+        setRiskyLocations(riskyLocations);
       }
     }
   };
@@ -53,22 +57,40 @@ export default function TabOneScreen() {
       setLoadingText("");
   };
 
+  const closeBtnPress = () => {
+    setRiskyLocations([]);
+  };
+
   return (
     <View style={styles.container}>
       <MapView style={styles.map} onPress={onMapPress} >
-        {location &&
-          <Marker coordinate ={location}/>
+        {(location && !riskyLocations.length) &&
+          <Marker coordinate={location} pinColor={'green'}/>
+        }
+        {
+          riskyLocations.length ?
+            riskyLocations.map((loc) => {
+              return (
+                <Marker coordinate={loc} pinColor={'red'} key={loc.timestamp} />
+              );
+            }) : null
+
         }
       </MapView>
       <View style={styles.crosshairContainer}>
-        <IconButton icon="crosshairs-gps"  onPress={crosshairBtnPress}/>
+        {
+          riskyLocations.length ?
+          <IconButton icon="close-circle"  onPress={closeBtnPress} />
+          :
+          <IconButton icon="crosshairs-gps"  onPress={crosshairBtnPress} />
+        }
       </View>
       <View style={[styles.checkSafetyContainer, loadingText? styles.transparentBackground: null]}>
         {loadingText ?
-        <TransparentBGText style={styles.loadingText}>{loadingText}</TransparentBGText>
+        <Text style={styles.loadingText}>{loadingText}</Text>
         :
         <Button onPress={onCheckClick}>
-          Check for 🦠
+          Verify contact risk
         </Button>}
       </View>
     </View>
