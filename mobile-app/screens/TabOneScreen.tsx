@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { StyleSheet, Alert } from 'react-native';
 import MapView, { MapEvent, Marker } from 'react-native-maps';
-import { Text, View, IconButton, Button, TransparentBGText } from '../components/Themed';
+import { Text, View, IconButton, Button } from '../components/Themed';
 import { getCurrentLocation } from "../services/location";
 import { verifyLocations } from "../services/ot";
 import { clearLocationData, updateLocationData } from '../services/storage';
@@ -19,7 +19,7 @@ export default function TabOneScreen() {
       const userLocation = await getCurrentLocation();
       setLocation(userLocation);
       setLoadingText("");
-      await clearLocationData();
+      // await clearLocationData();
     })()
   }, []);
 
@@ -37,24 +37,27 @@ export default function TabOneScreen() {
   };
 
   const onCheckClick = async () => {
-    if(location) {
-      const {data, error} = await updateLocationData(location);
+    if (location) {
+      setLoadingText("Retrieving location data");
+      const { data, error } = await updateLocationData(location);
       let riskyLocations: ILocation[];
-      if(error) {
+      setLoadingText("Verifying recent locations");
+      if (error) {
         riskyLocations = await verifyLocations([location]);
         setRiskyLocations(riskyLocations);
-      } else if(data) {
+      } else if (data) {
         riskyLocations = await verifyLocations(data);
         setRiskyLocations(riskyLocations);
       }
+      setLoadingText("");
     }
   };
 
   const crosshairBtnPress = async () => {
-      setLoadingText("Loading current location");
-      const userLocation = await getCurrentLocation();
-      setLocation(userLocation);
-      setLoadingText("");
+    setLoadingText("Loading current location");
+    const userLocation = await getCurrentLocation();
+    setLocation(userLocation);
+    setLoadingText("");
   };
 
   const closeBtnPress = () => {
@@ -65,7 +68,7 @@ export default function TabOneScreen() {
     <View style={styles.container}>
       <MapView style={styles.map} onPress={onMapPress} >
         {(location && !riskyLocations.length) &&
-          <Marker coordinate={location} pinColor={'green'}/>
+          <Marker coordinate={location} pinColor={'green'} />
         }
         {
           riskyLocations.length ?
@@ -80,18 +83,23 @@ export default function TabOneScreen() {
       <View style={styles.crosshairContainer}>
         {
           riskyLocations.length ?
-          <IconButton icon="close-circle"  onPress={closeBtnPress} />
-          :
-          <IconButton icon="crosshairs-gps"  onPress={crosshairBtnPress} />
+            <IconButton icon="close-circle" onPress={closeBtnPress} />
+            :
+            <IconButton icon="crosshairs-gps" onPress={crosshairBtnPress} />
         }
       </View>
-      <View style={[styles.checkSafetyContainer, loadingText? styles.transparentBackground: null]}>
+      <View style={[styles.checkSafetyContainer, loadingText || riskyLocations.length ? styles.transparentBackground : null]}>
         {loadingText ?
-        <Text style={styles.loadingText}>{loadingText}</Text>
-        :
-        <Button onPress={onCheckClick}>
-          Verify contact risk
-        </Button>}
+          <Text style={styles.loadingText}>{loadingText}</Text>
+          :
+          (riskyLocations.length ?
+            <Text style={styles.loadingText}>Viewing risky locations</Text>
+            :
+            <Button onPress={onCheckClick}>
+              Verify contact risk
+            </Button>
+          )
+        }
       </View>
     </View>
   );
@@ -103,8 +111,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
+    color: 'orange'
   },
   separator: {
     marginVertical: 30,
@@ -122,9 +131,9 @@ const styles = StyleSheet.create({
     left: '85%'
   },
   checkSafetyContainer: {
-  position: 'absolute',
-  alignSelf: 'center',
-  top: '90%'
+    position: 'absolute',
+    alignSelf: 'center',
+    top: '90%'
   },
   transparentBackground: {
     backgroundColor: "transparent"

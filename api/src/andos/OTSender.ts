@@ -38,10 +38,10 @@ class OTSender {
 
   prepareInitialValues(): IOTSenderInitialValues {
 
-    console.log(
-    `Generated y = ${this.y}
-    Jacobi symbol of y = ${computeJacobiLegendreSymbol(this.y, this.n.value)}
-    `);
+    // console.log(
+    // `Generated y = ${this.y}
+    // Jacobi symbol of y = ${computeJacobiLegendreSymbol(this.y, this.n.value)}
+    // `);
     const zArray: bigint[][] = [];
 
     for(const message of this.messages) {
